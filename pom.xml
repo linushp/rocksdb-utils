@@ -6,7 +6,7 @@
 
     <groupId>com.github.linushp</groupId>
     <artifactId>rocksdb-utils</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
     <name>rocksdb-utils</name>
     <description>java 使用 rocksDB 模拟常用工具类，如消息队列等</description>
     <url>https://github.com/linushp/rocksdb-utils</url>
