@@ -3,6 +3,7 @@ package com.github.linushp.rocksdb.linkedlist;
 import com.github.linushp.rocksdb.utils.NodeKeyManager;
 import com.github.linushp.rocksdb.utils.RocksFsBase;
 import org.rocksdb.RocksDB;
+import org.rocksdb.RocksDBException;
 
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -30,7 +31,7 @@ public class RocksLinkedList extends RocksFsBase implements List<byte[]>, Deque<
     private RocksLinkedList(RocksDB rocksDB, byte[] keyBytes) throws Exception {
         super(rocksDB);
         this.nodeKeyManager = NodeKeyManager.getInstance(rocksDB, keyBytes);
-        byte[] metaDataNodeKey = this.nodeKeyManager.getFirstNodeKey();
+        byte[] metaDataNodeKey = this.nodeKeyManager.getMetaDataNodeKey();
         this.metaData = RocksLinkedListMetaData.readOrCreateMetaData(rocksDB, metaDataNodeKey);
     }
 
@@ -570,27 +571,27 @@ public class RocksLinkedList extends RocksFsBase implements List<byte[]>, Deque<
         return false;
     }
 
-    
-    public synchronized void clear() {
+    public synchronized void quickClear() throws Exception {
+        byte[] keyBegin = this.nodeKeyManager.getMinNodeKey();
+        byte[] keyEnd = this.nodeKeyManager.getNextNodeKey();
 
-        for (RocksLinkedListNode x = metaData.getFirstNode(); x != null; ) {
+        rocksDB.deleteRange(keyBegin, keyEnd);
 
-            RocksLinkedListNode next = x.getNextNode();
-            x.setData(null);
-            x.setNextNode(null);
-            x.setPrevNode(null);
-
-            deleteRocksNode(x);
-
-            x = next;
-        }
 
         metaData.setLastNode(null);
         metaData.setFirstNode(null);
         metaData.setSize(0);
         metaData.setModCount(metaData.getModCount() + 1);
-
         saveRocksNode(metaData);
+    }
+
+
+    public synchronized void clear() {
+        try {
+            this.quickClear();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     

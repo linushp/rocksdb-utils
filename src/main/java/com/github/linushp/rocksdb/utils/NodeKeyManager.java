@@ -6,7 +6,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 public class NodeKeyManager {
-
+    private static final int MinCurrent = 100;
     private RocksDB rocksDB;
     private byte[] mask;
     private int current;
@@ -16,7 +16,7 @@ public class NodeKeyManager {
         byte[] selfNodeKey = getSelfNodeKey(mask);
         byte[] bytesData = rocksDB.get(selfNodeKey);
         if (bytesData == null) {
-            return new NodeKeyManager(rocksDB, mask, 100);
+            return new NodeKeyManager(rocksDB, mask, MinCurrent);
         }
         int current = StreamingUtils.readInt(bytesData);
         return new NodeKeyManager(rocksDB, mask, current);
@@ -32,6 +32,20 @@ public class NodeKeyManager {
     private static byte[] getSelfNodeKey(byte[] mask) throws IOException {
         return getNodeKey(mask, 0);
     }
+    public byte[] getMetaDataNodeKey() throws Exception {
+        return getNodeKey(this.mask, 1);
+    }
+
+    public byte[] getMinNodeKey() throws Exception {
+        return getNodeKey(this.mask, MinCurrent);
+    }
+
+    public byte[] getNextNodeKey() throws Exception {
+        this.current++;
+        byte[] nodeKey = getNodeKey(this.mask, this.current);
+        this.saveSelf();
+        return nodeKey;
+    }
 
     private static byte[] getNodeKey(byte[] mask, int number) throws IOException {
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
@@ -40,17 +54,12 @@ public class NodeKeyManager {
         return stream.toByteArray();
     }
 
-    public byte[] getFirstNodeKey() throws Exception {
-        return getNodeKey(this.mask, 1);
-    }
 
 
-    public byte[] getNextNodeKey() throws Exception {
-        byte[] nodeKey = getNodeKey(this.mask, this.current);
-        this.current++;
-        this.saveSelf();
-        return nodeKey;
-    }
+
+
+
+
 
 
     private void saveSelf() throws Exception {

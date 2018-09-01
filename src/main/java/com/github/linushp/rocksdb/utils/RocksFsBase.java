@@ -21,6 +21,26 @@ public class RocksFsBase {
     }
 
 
+    protected boolean isByteArrayEqual(byte[] keyBegin, byte[] keyEnd) {
+        if (keyBegin == keyEnd) {
+            return true;
+        }
+
+        if (keyBegin != null && keyEnd != null && keyBegin.length == keyEnd.length) {
+            int length = keyBegin.length;
+            for (int i = 0; i < length; i++) {
+                byte b_1 = keyBegin[i];
+                byte b_2 = keyEnd[i];
+                if (b_1 != b_2) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        return false;
+    }
+
     protected boolean isEmpty(byte[] byteArray) {
         return byteArray == null || byteArray.length == 0;
     }
