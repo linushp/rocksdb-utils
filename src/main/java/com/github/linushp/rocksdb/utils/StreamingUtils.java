@@ -8,24 +8,11 @@ import java.nio.charset.StandardCharsets;
 
 public class StreamingUtils {
 
-    /**
-     * Writing byte to stream
-     *
-     * @param v      value
-     * @param stream destination stream
-     * @throws IOException
-     */
+
     public static void writeByte(int v, OutputStream stream) throws IOException {
         stream.write(v);
     }
 
-    /**
-     * Writing byte to stream
-     *
-     * @param v      value
-     * @param stream destination stream
-     * @throws IOException
-     */
     public static void writeByte(Byte v, OutputStream stream) throws IOException {
         if (v == null) {
             v = 0;
@@ -41,13 +28,7 @@ public class StreamingUtils {
         return (byte) a;
     }
 
-    /**
-     * Writing int to stream
-     *
-     * @param v      value
-     * @param stream destination stream
-     * @throws IOException
-     */
+
     public static void writeInt(Integer v, OutputStream stream) throws IOException {
         if (v == null) {
             v = 0;
@@ -79,13 +60,7 @@ public class StreamingUtils {
         buffer[offset + 3] = (byte) (v & 0xFF);
     }
 
-    /**
-     * Writing long to stream
-     *
-     * @param v      value
-     * @param stream destination stream
-     * @throws IOException
-     */
+
     public static void writeLong(Long v, OutputStream stream) throws IOException {
         if (v == null) {
             v = 0L;
@@ -136,13 +111,7 @@ public class StreamingUtils {
 
     }
 
-    /**
-     * Writing double to stream
-     *
-     * @param v      value
-     * @param stream destination stream
-     * @throws IOException
-     */
+
     public static void writeDouble(Double v, OutputStream stream) throws IOException {
         if (v == null) {
             v = 0D;
@@ -151,35 +120,17 @@ public class StreamingUtils {
     }
 
 
-    /**
-     * Writing byte array to stream
-     *
-     * @param data   data
-     * @param stream destination stream
-     * @throws IOException
-     */
+
     private static void writeByteArray(byte[] data, OutputStream stream) throws IOException {
         stream.write(data);
     }
 
-    /**
-     * Writing byte array to stream
-     *
-     * @param data   data
-     * @param stream destination stream
-     * @throws IOException
-     */
+
     private static void writeByteArray(byte[] data, int offset, int len, OutputStream stream) throws IOException {
         stream.write(data, offset, len);
     }
 
-    /**
-     * Writing tl-string value
-     *
-     * @param v      value
-     * @param stream destination stream
-     * @throws IOException
-     */
+
     public static void writeTLString(String v, OutputStream stream) throws IOException {
         if (v == null) {
             v = "";
@@ -187,13 +138,7 @@ public class StreamingUtils {
         writeTLBytes(v.getBytes(StandardCharsets.UTF_8), stream);
     }
 
-    /**
-     * Writing tl-bool value
-     *
-     * @param v      value
-     * @param stream destination stream
-     * @throws IOException
-     */
+
     public static void writeTLBool(Boolean v, OutputStream stream) throws IOException {
         if (v == null) {
             writeByte(0, stream);
@@ -213,13 +158,7 @@ public class StreamingUtils {
     }
 
 
-    /**
-     * Writing tl-bytes value
-     *
-     * @param v      value
-     * @param stream destination stream
-     * @throws IOException
-     */
+
     public static void writeTLBytes(byte[] v, OutputStream stream) throws IOException {
         if (v == null) {
             v = new byte[]{};
@@ -245,13 +184,7 @@ public class StreamingUtils {
         }
     }
 
-    /**
-     * Writing tl-bytes value
-     *
-     * @param v      value
-     * @param stream destination stream
-     * @throws IOException
-     */
+
     public static void writeTLBytes(TLBytes v, OutputStream stream) throws IOException {
         int startOffset = 1;
         if (v.getLength() >= 254) {
@@ -274,13 +207,7 @@ public class StreamingUtils {
     }
 
 
-    /**
-     * Reading int from stream
-     *
-     * @param stream source stream
-     * @return value
-     * @throws IOException reading exception
-     */
+
     public static int readInt(InputStream stream) throws IOException {
         int a = stream.read();
         if (a < 0) {
@@ -323,13 +250,7 @@ public class StreamingUtils {
         return (a << 24) + (b << 16) + (c << 8) + (d);
     }
 
-    /**
-     * Reading uint from stream
-     *
-     * @param stream source stream
-     * @return value
-     * @throws IOException reading exception
-     */
+
     public static long readUInt(InputStream stream) throws IOException {
         long a = stream.read();
         if (a < 0) {
@@ -372,13 +293,7 @@ public class StreamingUtils {
         return (a << 24) + (b << 16) + (c << 8) + (d);
     }
 
-    /**
-     * Reading long from stream
-     *
-     * @param stream source stream
-     * @return value
-     * @throws IOException reading exception
-     */
+
     public static long readLong(InputStream stream) throws IOException {
         long a = readUInt(stream);
         long b = readUInt(stream);
@@ -393,38 +308,19 @@ public class StreamingUtils {
         return (a << 32) + (b);
     }
 
-    /**
-     * Reading double from stream
-     *
-     * @param stream source stream
-     * @return value
-     * @throws IOException reading exception
-     */
+
     public static double readDouble(InputStream stream) throws IOException {
         return Double.longBitsToDouble(readLong(stream));
     }
 
 
-    /**
-     * Reading tl-string from stream
-     *
-     * @param stream source stream
-     * @return value
-     * @throws IOException reading exception
-     */
+
     public static String readTLString(InputStream stream) throws IOException {
         return new String(readTLBytes(stream), StandardCharsets.UTF_8);
     }
 
 
-    /**
-     * Reading bytes from stream
-     *
-     * @param count  bytes count
-     * @param stream source stream
-     * @return readed bytes
-     * @throws IOException reading exception
-     */
+
     public static byte[] readBytes(int count, InputStream stream) throws IOException {
         byte[] res = new byte[count];
         int offset = 0;
@@ -441,26 +337,12 @@ public class StreamingUtils {
         return res;
     }
 
-    /**
-     * Reading bytes from stream
-     *
-     * @param count  bytes count
-     * @param stream source stream
-     * @return readed bytes
-     * @throws IOException reading exception
-     */
+
     public static void skipBytes(int count, InputStream stream) throws IOException {
         stream.skip(count);
     }
 
-    /**
-     * Reading bytes from stream
-     *
-     * @param count  bytes count
-     * @param stream source stream
-     * @return readed bytes
-     * @throws IOException reading exception
-     */
+
     public static void readBytes(byte[] buffer, int offset, int count, InputStream stream) throws IOException {
         int woffset = 0;
         while (woffset < count) {
@@ -475,13 +357,7 @@ public class StreamingUtils {
         }
     }
 
-    /**
-     * Reading tl-bytes from stream
-     *
-     * @param stream source stream
-     * @return readed bytes
-     * @throws IOException reading exception
-     */
+
     public static byte[] readTLBytes(InputStream stream) throws IOException {
         int count = stream.read();
         int startOffset = 1;
@@ -501,12 +377,7 @@ public class StreamingUtils {
     }
 
 
-    /**
-     * Converting int to bytes
-     *
-     * @param value source integer
-     * @return bytes of integer
-     */
+
     public static byte[] intToBytes(int value) {
         return new byte[]{
                 (byte) (value & 0xFF),
@@ -524,12 +395,7 @@ public class StreamingUtils {
         };
     }
 
-    /**
-     * Converting long to bytes
-     *
-     * @param value source long
-     * @return bytes of long
-     */
+
     public static byte[] longToBytes(long value) {
         return new byte[]{
                 (byte) (value & 0xFF),
@@ -542,23 +408,12 @@ public class StreamingUtils {
                 (byte) ((value >> 56) & 0xFF)};
     }
 
-    /**
-     * Reading int from bytes array
-     *
-     * @param src source bytes
-     * @return int value
-     */
+
     public static int readInt(byte[] src) {
         return readInt(src, 0);
     }
 
-    /**
-     * Reading int from bytes array
-     *
-     * @param src    source bytes
-     * @param offset offset in array
-     * @return int value
-     */
+
     public static int readInt(byte[] src, int offset) {
         int a = src[offset + 0] & 0xFF;
         int b = src[offset + 1] & 0xFF;
@@ -577,23 +432,11 @@ public class StreamingUtils {
         return (a << 24) + (b << 16) + (c << 8) + (d);
     }
 
-    /**
-     * Reading uint from bytes array
-     *
-     * @param src source bytes
-     * @return uint value
-     */
+
     public static long readUInt(byte[] src) {
         return readUInt(src, 0);
     }
 
-    /**
-     * Reading uint from bytes array
-     *
-     * @param src    source bytes
-     * @param offset offset in array
-     * @return uint value
-     */
     public static long readUInt(byte[] src, int offset) {
         long a = src[offset + 0] & 0xFF;
         long b = src[offset + 1] & 0xFF;
@@ -612,13 +455,6 @@ public class StreamingUtils {
         return (a << 24) + (b << 16) + (c << 8) + (d);
     }
 
-    /**
-     * Reading long value from bytes array
-     *
-     * @param src    source bytes
-     * @param offset offset in array
-     * @return long value
-     */
     public static long readLong(byte[] src, int offset) {
         long a = readUInt(src, offset);
         long b = readUInt(src, offset + 4);

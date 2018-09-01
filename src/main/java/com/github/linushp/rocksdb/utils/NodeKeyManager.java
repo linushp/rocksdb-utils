@@ -6,6 +6,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 public class NodeKeyManager {
+
     private RocksDB rocksDB;
     private byte[] mask;
     private int current;
@@ -35,7 +36,7 @@ public class NodeKeyManager {
     private static byte[] getNodeKey(byte[] mask, int number) throws IOException {
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
         StreamingUtils.writeTLBytes(mask, stream);
-        StreamingUtils.writeInt(number, stream);
+        StreamingUtils.writeIntBigending(number, stream);
         return stream.toByteArray();
     }
 
