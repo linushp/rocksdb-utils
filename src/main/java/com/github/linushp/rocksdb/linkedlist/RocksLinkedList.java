@@ -3,12 +3,11 @@ package com.github.linushp.rocksdb.linkedlist;
 import com.github.linushp.rocksdb.utils.NodeKeyManager;
 import com.github.linushp.rocksdb.utils.RocksFsBase;
 import org.rocksdb.RocksDB;
-import org.rocksdb.RocksDBException;
 
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
-public class RocksLinkedList extends RocksFsBase implements List<byte[]>, Deque<byte[]> {
+public class RocksLinkedList extends RocksFsBase {
 
     private final RocksLinkedListMetaData metaData;
     private final NodeKeyManager nodeKeyManager;
@@ -60,10 +59,10 @@ public class RocksLinkedList extends RocksFsBase implements List<byte[]>, Deque<
 
     private RocksLinkedListNode newRocksLinkedListNode(RocksLinkedListNode prevNode, byte[] data, RocksLinkedListNode nextNode) throws Exception {
         byte[] nodeKey = this.nodeKeyManager.getNextNodeKey();
-        return new RocksLinkedListNode(this.rocksDB,nodeKey, prevNode, data, nextNode);
+        return new RocksLinkedListNode(this.rocksDB, nodeKey, prevNode, data, nextNode);
     }
 
-    
+
     public synchronized void addFirst(byte[] byteArray) {
         try {
             linkFirst(byteArray);
@@ -72,7 +71,7 @@ public class RocksLinkedList extends RocksFsBase implements List<byte[]>, Deque<
         }
     }
 
-    
+
     public synchronized void addLast(byte[] byteArray) {
         try {
             linkLast(byteArray);
@@ -124,19 +123,19 @@ public class RocksLinkedList extends RocksFsBase implements List<byte[]>, Deque<
 
     }
 
-    
+
     public synchronized boolean offerFirst(byte[] e) {
         addFirst(e);
         return true;
     }
 
-    
+
     public synchronized boolean offerLast(byte[] e) {
         addLast(e);
         return true;
     }
 
-    
+
     public synchronized byte[] removeFirst() {
         final RocksLinkedListNode f = getRocksLinkedListNode(metaData.getFirstNodeKey());
         if (f == null)
@@ -145,32 +144,30 @@ public class RocksLinkedList extends RocksFsBase implements List<byte[]>, Deque<
     }
 
     private synchronized byte[] unlinkFirst(RocksLinkedListNode f) {
-        synchronized (metaData) {
-            // assert f == first && f != null;
-            final byte[] element = f.getData();
-            final RocksLinkedListNode next = f.getNextNode();
-            f.setData(null);
-            f.setNextNodeKey(null); // help GC
+        // assert f == first && f != null;
+        final byte[] element = f.getData();
+        final RocksLinkedListNode next = f.getNextNode();
+        f.setData(null);
+        f.setNextNodeKey(null); // help GC
 
-            metaData.setFirstNode(next);
-            if (next == null) {
-                metaData.setLastNode(null);
-            } else {
-                next.setPrevNode(null);
-            }
-            metaData.setSize(metaData.getSize() - 1);
-            metaData.setModCount(metaData.getModCount() + 1);
-
-            saveRocksNode(metaData);
-            saveRocksNode(next);
-            deleteRocksNode(f);
-
-            return element;
+        metaData.setFirstNode(next);
+        if (next == null) {
+            metaData.setLastNode(null);
+        } else {
+            next.setPrevNode(null);
         }
+        metaData.setSize(metaData.getSize() - 1);
+        metaData.setModCount(metaData.getModCount() + 1);
+
+        saveRocksNode(metaData);
+        saveRocksNode(next);
+        deleteRocksNode(f);
+
+        return element;
+
     }
 
 
-    
     public synchronized byte[] removeLast() {
         final RocksLinkedListNode l = metaData.getLastNode();
         if (l == null)
@@ -180,39 +177,38 @@ public class RocksLinkedList extends RocksFsBase implements List<byte[]>, Deque<
 
     private synchronized byte[] unlinkLast(RocksLinkedListNode l) {
 
-        synchronized (metaData) {
-            final byte[] element = l.getData();
-            final RocksLinkedListNode prev = l.getPrevNode();
-            l.setData(null);
-            l.setPrevNode(null);
+        final byte[] element = l.getData();
+        final RocksLinkedListNode prev = l.getPrevNode();
+        l.setData(null);
+        l.setPrevNode(null);
 
-            metaData.setLastNode(prev);
-            if (prev == null) {
-                metaData.setFirstNode(null);
-            } else {
-                prev.setNextNode(null);
-            }
-
-            metaData.setSize(metaData.getSize() - 1);
-            metaData.setModCount(metaData.getModCount() + 1);
-
-            return element;
+        metaData.setLastNode(prev);
+        if (prev == null) {
+            metaData.setFirstNode(null);
+        } else {
+            prev.setNextNode(null);
         }
+
+        metaData.setSize(metaData.getSize() - 1);
+        metaData.setModCount(metaData.getModCount() + 1);
+
+        return element;
+
     }
 
-    
+
     public synchronized byte[] pollFirst() {
         final RocksLinkedListNode f = metaData.getFirstNode();
         return (f == null) ? null : unlinkFirst(f);
     }
 
-    
+
     public synchronized byte[] pollLast() {
         final RocksLinkedListNode l = metaData.getLastNode();
         return (l == null) ? null : unlinkLast(l);
     }
 
-    
+
     public synchronized byte[] getFirst() {
         final RocksLinkedListNode f = metaData.getFirstNode();
         if (f == null)
@@ -220,7 +216,7 @@ public class RocksLinkedList extends RocksFsBase implements List<byte[]>, Deque<
         return f.getData();
     }
 
-    
+
     public synchronized byte[] getLast() {
         final RocksLinkedListNode l = metaData.getLastNode();
         if (l == null)
@@ -228,24 +224,24 @@ public class RocksLinkedList extends RocksFsBase implements List<byte[]>, Deque<
         return l.getData();
     }
 
-    
+
     public synchronized byte[] peekFirst() {
         final RocksLinkedListNode f = metaData.getFirstNode();
         return (f == null) ? null : f.getData();
     }
 
-    
+
     public synchronized byte[] peekLast() {
         final RocksLinkedListNode l = metaData.getLastNode();
         return (l == null) ? null : l.getData();
     }
 
-    
+
     public synchronized boolean removeFirstOccurrence(Object o) {
         return remove(o);
     }
 
-    
+
     public synchronized boolean removeLastOccurrence(Object o) {
 
         if (o == null) {
@@ -303,45 +299,45 @@ public class RocksLinkedList extends RocksFsBase implements List<byte[]>, Deque<
 
     }
 
-    
+
     public synchronized boolean offer(byte[] e) {
         return add(e);
     }
 
-    
+
     public synchronized byte[] remove() {
         return removeFirst();
     }
 
-    
+
     public synchronized byte[] poll() {
         final RocksLinkedListNode f = metaData.getFirstNode();
         return (f == null) ? null : unlinkFirst(f);
 
     }
 
-    
+
     public synchronized byte[] element() {
         return getFirst();
     }
 
-    
+
     public synchronized byte[] peek() {
         final RocksLinkedListNode f = metaData.getFirstNode();
         return (f == null) ? null : f.getData();
     }
 
-    
+
     public synchronized void push(byte[] e) {
         addFirst(e);
     }
 
-    
+
     public synchronized byte[] pop() {
         return removeFirst();
     }
 
-    
+
     public synchronized Iterator<byte[]> descendingIterator() {
         return new DescendingIterator();
     }
@@ -366,27 +362,21 @@ public class RocksLinkedList extends RocksFsBase implements List<byte[]>, Deque<
     }
 
 
-    
     public synchronized int size() {
         return metaData.getSize();
     }
 
-    
+
     public synchronized boolean isEmpty() {
         return this.size() == 0;
     }
 
-    
-    public synchronized boolean contains(Object o) {
-        return indexOf(o) != -1;
-    }
 
-    
     public synchronized Iterator<byte[]> iterator() {
         return this.listIterator();
     }
 
-    
+
     public synchronized Object[] toArray() {
         int size = metaData.getSize();
         Object[] result = new Object[size];
@@ -397,13 +387,7 @@ public class RocksLinkedList extends RocksFsBase implements List<byte[]>, Deque<
         return result;
     }
 
-    
-    public synchronized <T> T[] toArray(T[] a) {
-        //不实现
-        return null;
-    }
 
-    
     public synchronized boolean add(byte[] e) {
         try {
             linkLast(e);
@@ -413,7 +397,7 @@ public class RocksLinkedList extends RocksFsBase implements List<byte[]>, Deque<
         return false;
     }
 
-    
+
     public synchronized boolean remove(Object o) {
 
         if (o == null) {
@@ -434,72 +418,63 @@ public class RocksLinkedList extends RocksFsBase implements List<byte[]>, Deque<
         return false;
     }
 
-    
-    public synchronized boolean containsAll(Collection<?> c) {
-        //不实现
-        return false;
-    }
 
-    
     public synchronized boolean addAll(Collection<? extends byte[]> c) {
         return addAll(metaData.getSize(), c);
     }
 
-    
+
     public synchronized boolean addAll(int index, Collection<? extends byte[]> c) {
-        synchronized (metaData) {
-            checkPositionIndex(index);
+        checkPositionIndex(index);
 
-            Object[] a = c.toArray();
-            int numNew = a.length;
-            if (numNew == 0)
-                return false;
+        Object[] a = c.toArray();
+        int numNew = a.length;
+        if (numNew == 0)
+            return false;
 
-            RocksLinkedListNode pred, succ;
+        RocksLinkedListNode pred, succ;
 
-            if (index == metaData.getSize()) {
-                succ = null;
-                pred = metaData.getLastNode();
-            } else {
-                succ = node(index);
-                pred = succ.getPrevNode();
-            }
-
-            for (Object o : a) {
-                @SuppressWarnings("unchecked") byte[] e = (byte[]) o;
-                RocksLinkedListNode newNode = null;
-                try {
-                    newNode = newRocksLinkedListNode(pred, e, null);
-                } catch (Exception e1) {
-                    e1.printStackTrace();
-                }
-                if (pred == null) {
-                    metaData.setFirstNode(newNode);
-                } else {
-                    pred.setNextNode(newNode);
-                }
-                pred = newNode;
-
-                saveRocksNode(newNode);
-            }
-
-            if (succ == null) {
-                metaData.setLastNode(pred);
-            } else {
-                pred.setNextNode(succ);
-                succ.setPrevNode(pred);
-            }
-
-            metaData.setSize(metaData.getSize() + numNew);
-            metaData.setModCount(metaData.getModCount() + 1);
-
-            saveRocksNode(metaData);
-            saveRocksNode(pred);
-            saveRocksNode(succ);
-
-
-            return true;
+        if (index == metaData.getSize()) {
+            succ = null;
+            pred = metaData.getLastNode();
+        } else {
+            succ = node(index);
+            pred = succ.getPrevNode();
         }
+
+        for (Object o : a) {
+            @SuppressWarnings("unchecked") byte[] e = (byte[]) o;
+            RocksLinkedListNode newNode = null;
+            try {
+                newNode = newRocksLinkedListNode(pred, e, null);
+            } catch (Exception e1) {
+                e1.printStackTrace();
+            }
+            if (pred == null) {
+                metaData.setFirstNode(newNode);
+            } else {
+                pred.setNextNode(newNode);
+            }
+            pred = newNode;
+
+            saveRocksNode(newNode);
+        }
+
+        if (succ == null) {
+            metaData.setLastNode(pred);
+        } else {
+            pred.setNextNode(succ);
+            succ.setPrevNode(pred);
+        }
+
+        metaData.setSize(metaData.getSize() + numNew);
+        metaData.setModCount(metaData.getModCount() + 1);
+
+        saveRocksNode(metaData);
+        saveRocksNode(pred);
+        saveRocksNode(succ);
+
+        return true;
     }
 
     /**
@@ -559,17 +534,6 @@ public class RocksLinkedList extends RocksFsBase implements List<byte[]>, Deque<
         }
     }
 
-    
-    public boolean removeAll(Collection<?> c) {
-        //不实现
-        return false;
-    }
-
-    
-    public boolean retainAll(Collection<?> c) {
-        //不实现
-        return false;
-    }
 
     public synchronized void quickClear() throws Exception {
         byte[] keyBegin = this.nodeKeyManager.getMinNodeKey();
@@ -594,14 +558,15 @@ public class RocksLinkedList extends RocksFsBase implements List<byte[]>, Deque<
         }
     }
 
-    
+
     public synchronized byte[] get(int index) {
         checkElementIndex(index);
         return node(index).getData();
     }
 
-    
+
     public synchronized byte[] set(int index, byte[] element) {
+
         checkElementIndex(index);
 
         RocksLinkedListNode x = node(index);
@@ -610,11 +575,10 @@ public class RocksLinkedList extends RocksFsBase implements List<byte[]>, Deque<
 
         saveRocksNode(x);
 
-
         return oldVal;
     }
 
-    
+
     public synchronized void add(int index, byte[] element) {
         checkPositionIndex(index);
 
@@ -634,40 +598,20 @@ public class RocksLinkedList extends RocksFsBase implements List<byte[]>, Deque<
     }
 
 
-    
     public synchronized byte[] remove(int index) {
         checkElementIndex(index);
         return unlink(node(index));
     }
 
-    
-    public int indexOf(Object o) {
-        //不实现
-        return 0;
-    }
 
-    
-    public int lastIndexOf(Object o) {
-        //不实现
-        return 0;
-    }
-
-
-    
     public ListIterator<byte[]> listIterator() {
         return listIterator(0);
     }
 
-    
+
     public ListIterator<byte[]> listIterator(int index) {
         checkPositionIndex(index);
         return new ListItr(index);
-    }
-
-    
-    public List<byte[]> subList(int fromIndex, int toIndex) {
-        //不支持
-        return null;
     }
 
 
